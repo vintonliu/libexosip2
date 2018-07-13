@@ -218,6 +218,57 @@ eXosip_get_sdp_info (osip_message_t * message)
   return NULL;
 }
 
+const char *eXosip_get_sdp_body_str(osip_message_t *message) {
+	osip_content_type_t *ctt;
+	sdp_message_t *sdp;
+	osip_body_t *oldbody;
+	osip_list_iterator_t it;
+
+	if (message == NULL)
+		return NULL;
+
+	/* get content-type info */
+	ctt = osip_message_get_content_type(message);
+	if (ctt == NULL)
+		return NULL;                /* previous message was not correct or empty */
+
+	if (ctt->type == NULL || ctt->subtype == NULL)
+		return NULL;
+	if (osip_strcasecmp(ctt->type, "multipart") == 0) {
+		/* probably within the multipart attachement */
+	}
+	else if (osip_strcasecmp(ctt->type, "application") != 0 || osip_strcasecmp(ctt->subtype, "sdp") != 0)
+		return NULL;
+
+	oldbody = (osip_body_t *)osip_list_get_first(&message->bodies, &it);
+	while (oldbody != NULL) {
+		int i;
+		sdp_message_init(&sdp);
+		i = sdp_message_parse(sdp, oldbody->body);
+		if (i == 0) {
+			sdp_message_free(sdp);
+			sdp = NULL;
+			return oldbody->body;
+		}
+		sdp_message_free(sdp);
+		sdp = NULL;
+		oldbody = (osip_body_t *)osip_list_get_next(&it);
+	}
+	return NULL;
+}
+
+sdp_message_t *
+eXosip_get_sdp_info_from_str(const char *sdp) {
+	sdp_message_t *msg;
+	sdp_message_init(&msg);
+	int i = sdp_message_parse(msg, sdp);
+	if (i == 0)
+	{
+		return msg;
+	}
+
+	return NULL;
+}
 
 sdp_connection_t *
 eXosip_get_audio_connection (sdp_message_t * sdp)

@@ -346,6 +346,7 @@ _eXosip_register_build_register (struct eXosip_t *excontext, eXosip_reg_t * jr, 
 					osip_contact_to_str(con, &tmp);
 					osip_message_set_contact(reg, tmp);
 					osip_free(tmp);
+					osip_contact_free(con);
 
 					/* get next contact */
 					co = (osip_contact_t *)osip_list_get_next(&it);
@@ -367,18 +368,17 @@ _eXosip_register_build_register (struct eXosip_t *excontext, eXosip_reg_t * jr, 
         }
       }
 
-			/* free all contacts except the first one we wanted */
-			int co_size = osip_list_size(&reg->contacts);
-			while (co_size > 1)
-			{
-				osip_contact_t *co;
-				osip_message_get_contact(reg, 1, &co);
-				if (co != NULL)
-				{
-					co_size = osip_list_remove(&reg->contacts, 1);
-				}
-			}
-			/* end */
+	/* free all contacts except the first one we wanted */
+	int co_size = osip_list_size(&reg->contacts);
+	if (co_size > 1 && contact != NULL)
+	{
+		char *tmp = NULL;
+		osip_contact_to_str(contact, &tmp);
+		osip_list_set_empty(&reg->contacts, (void(*)(void*))osip_contact_free);
+		osip_message_set_contact(reg, tmp);
+		osip_free(tmp);
+	}
+	/* end */
 
       if (excontext->eXtl_transport._tl_update_contact!=NULL)
         excontext->eXtl_transport._tl_update_contact(excontext, reg);

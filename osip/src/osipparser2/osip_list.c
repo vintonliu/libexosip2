@@ -294,3 +294,12 @@ osip_list_remove (osip_list_t * li, int pos)
   }
   return li->nb_elt;
 }
+
+void osip_list_set_empty(osip_list_t *l, void(*freefunc)(void*)) {
+	void *data;
+	while (!osip_list_eol(l, 0)) {
+		data = osip_list_get(l, 0);
+		osip_list_remove(l, 0);
+		if (data) freefunc(data);
+	}
+}

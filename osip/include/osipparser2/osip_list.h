@@ -169,6 +169,10 @@ extern "C" {
  */
   void *osip_list_iterator_remove (osip_list_iterator_t * it);
 
+	/**
+	 * Remove all elements from a list and invoke freefunc to free element
+	 */
+	void osip_list_set_empty(osip_list_t *l, void(*freefunc)(void*));
 #ifdef __cplusplus
 }
 #endif

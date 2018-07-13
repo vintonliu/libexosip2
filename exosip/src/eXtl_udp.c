@@ -929,7 +929,8 @@ _udp_tl_update_contact (struct eXosip_t *excontext, osip_message_t * req)
   if (proxy != NULL) {
     for (i = 0; i < MAX_EXOSIP_ACCOUNT_INFO; i++) {
       if (excontext->account_entries[i].proxy[0] != '\0') {
-        if (strstr (excontext->account_entries[i].proxy, proxy) != NULL || strstr (proxy, excontext->account_entries[i].proxy) != NULL) {
+        if ((strstr (excontext->account_entries[i].proxy, proxy) != NULL)
+					|| (strstr (proxy, excontext->account_entries[i].proxy) != NULL)) {
           /* use ainfo */
           if (excontext->account_entries[i].nat_ip[0] != '\0') {
             ainfo = &excontext->account_entries[i];

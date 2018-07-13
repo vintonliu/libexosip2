@@ -229,6 +229,18 @@ extern "C" {
  */
   sdp_message_t *eXosip_get_sdp_info (osip_message_t * message);
 
+	/**
+	 * Get first SDP body string for the given message
+	 * @param message message containing the SDP.
+	 */
+	const char *eXosip_get_sdp_body_str(osip_message_t *message);
+
+	/**
+	 * Get SDP message from sdp string
+	 * @param sdp sdp in string format
+	 */
+	sdp_message_t *eXosip_get_sdp_info_from_str(const char *sdp);
+
 /**
  * Get audio connection information for call.
  * 
