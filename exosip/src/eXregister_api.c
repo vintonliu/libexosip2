@@ -305,6 +305,52 @@ _eXosip_register_build_register (struct eXosip_t *excontext, eXosip_reg_t * jr, 
           osip_contact_param_add (contact, osip_strdup ("expires"), osip_strdup ("0"));
         }
       }
+
+			/* remove all contacts which remained on server */
+			if (last_response != NULL) {
+				osip_list_iterator_t it;
+				osip_contact_t* co = (osip_contact_t *)osip_list_get_first(&last_response->contacts, &it);
+				while (co) {
+					/* search for matching contact (line parameter must be equal) */
+					osip_uri_param_t *line_param_req = NULL;
+					osip_uri_param_t *line_param_rsp = NULL;
+					if (contact->url != NULL) {
+						osip_uri_uparam_get_byname(contact->url, "line", &line_param_req);
+					}
+
+					if (co->url != NULL) {
+						osip_uri_uparam_get_byname(co->url, "line", &line_param_rsp);
+					}
+
+					if (line_param_rsp != NULL && line_param_rsp->gvalue != NULL &&
+						 line_param_req != NULL && line_param_req->gvalue != NULL) {						
+						if (!osip_strcasecmp(line_param_req->gvalue, line_param_rsp->gvalue)) {
+							/* found contact */
+							/* get next contact */
+							co = (osip_contact_t *)osip_list_get_next(&it);
+							continue;
+						}
+					}
+
+					osip_contact_t *con = NULL;
+					osip_contact_clone(co, &con);
+					
+					osip_generic_param_t *exp_param = NULL;
+					osip_contact_param_get_byname(con, "expires", &exp_param);
+					if (exp_param != NULL && exp_param->gvalue != NULL) {						
+						osip_free(exp_param->gvalue);
+						exp_param->gvalue = osip_strdup("0");						
+					}
+					
+					char *tmp = NULL;
+					osip_contact_to_str(con, &tmp);
+					osip_message_set_contact(reg, tmp);
+					osip_free(tmp);
+
+					/* get next contact */
+					co = (osip_contact_t *)osip_list_get_next(&it);
+				}
+			}
     } else if (jr->registration_step==RS_MASQUERADINGPROCEEDING) {
       osip_contact_t *contact;
       osip_message_get_contact(reg, 0, &contact);
@@ -320,6 +366,20 @@ _eXosip_register_build_register (struct eXosip_t *excontext, eXosip_reg_t * jr, 
           exp_param = (osip_generic_param_t *)osip_list_get_next(&it);
         }
       }
+
+			/* free all contacts except the first one we wanted */
+			int co_size = osip_list_size(&reg->contacts);
+			while (co_size > 1)
+			{
+				osip_contact_t *co;
+				osip_message_get_contact(reg, 1, &co);
+				if (co != NULL)
+				{
+					co_size = osip_list_remove(&reg->contacts, 1);
+				}
+			}
+			/* end */
+
       if (excontext->eXtl_transport._tl_update_contact!=NULL)
         excontext->eXtl_transport._tl_update_contact(excontext, reg);
       jr->registration_step=RS_MASQUERADINGPROCEEDING+1; /* do only once: keep previous one after */

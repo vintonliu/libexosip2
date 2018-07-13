@@ -2,3 +2,5 @@
 *.db
 *.opendb
 build
+*.db-wal
+exosip/platform/vsnet/.vs/eXosip/v15/Solution.VC.db-shm
