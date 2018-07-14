@@ -383,6 +383,12 @@ _eXosip_register_build_register (struct eXosip_t *excontext, eXosip_reg_t * jr, 
       if (excontext->eXtl_transport._tl_update_contact!=NULL)
         excontext->eXtl_transport._tl_update_contact(excontext, reg);
       jr->registration_step=RS_MASQUERADINGPROCEEDING+1; /* do only once: keep previous one after */
+    } else if ((excontext->masquerade_via > 0) && 
+			(jr->registration_step == (RS_MASQUERADINGPROCEEDING + 1))) {
+		/* Via have been restored default when invoked _eXosip_register_build_register to build REGISTER,
+		 * so we need update it when masquerade_via enable */
+		if (excontext->eXtl_transport._tl_update_contact != NULL)
+			excontext->eXtl_transport._tl_update_contact(excontext, reg);
     } else if (jr->registration_step==0) {
       if (excontext->eXtl_transport._tl_update_contact!=NULL)
         excontext->eXtl_transport._tl_update_contact(excontext, reg);

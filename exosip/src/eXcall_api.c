@@ -1381,6 +1381,11 @@ _eXosip_call_retry_request (struct eXosip_t *excontext, eXosip_call_t * jc, eXos
     return i;
   }
 
+	if (excontext->masquerade_via > 0) {
+		if (excontext->eXtl_transport._tl_update_contact != NULL)
+			excontext->eXtl_transport._tl_update_contact(excontext, msg);
+	}
+
   if (out_tr->last_response->status_code == 422) {
     /* increase expires value to "min-se" value */
     osip_header_t *exp;

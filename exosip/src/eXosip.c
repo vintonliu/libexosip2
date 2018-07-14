@@ -1419,6 +1419,17 @@ _eXosip_update_top_via (struct eXosip_t *excontext, osip_message_t * sip)
   if (via->host==NULL)
     return OSIP_NOMEM;
 
+	/* when enable masquerade_via, the via port wrong in REGISTER message for authentication */
+	if (via->port)
+	{
+		osip_free(via->port);
+		via->port = osip_strdup("99999");
+		if (via->port == NULL)
+		{
+			return OSIP_NOMEM;
+		}
+	}
+
   /* browse parameter and replace "branch" */
   osip_via_param_get_byname (via, "branch", &br);
 
